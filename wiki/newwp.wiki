@@ -43,3 +43,43 @@ new waypoint gla = GLA :- ll;
 new waypoint pr = Print :- ?gla;
 }}}
 
+The above code specifies that we are  reading `lineitem`, apply selection than send tuples to the GLA. Once done, we print the result. This means that the GLA should produce tuples. If we want to move the GLA state to the users space, we can introduce a new waypoint that allows that
+
+{{{
+new waypoint st = TransmitState :- ?gla;
+}}}
+
+For the specification of the behavior of the GLA waypoint, we can use something like this:
+
+{{{
+new query Q1, Q2;
+waypoint gla {
+  query Q1 { 
+    gla (r:DOUBLE) = AverageGLA( lineitem_l_discount );
+  }
+  query Q2 {
+    gla (a:DOUBLE,b:INT,c:VARCHAR) = MyGla( lineitem_l_discount, lineitem_l_comment); 
+  }
+}
+
+waypoint pr {
+  query Q1 { print r; }
+  query Q2 { print a,b,c; }
+}
+}}}
+
+The line `gla (r:DOUBLE) = AverageGLA( lineitem_l_discount );` specifies that for `Q1` we have to use GLA `AverageGLA` for which the `AddItem()` function takes as argument expression `lineitem_l_discount`. The GLA will produce a tuple that consists of a single `DOUBLE`, called `r`. A larger set of expressions and a larger set of results can be obtained. 
+
+*NOTE* each query can have a different behavior. The system should allow that but it might be useful to have very different behavior. By using different GLAs for different queries, we can evaluate multiple things over the scan of the input. This could significantly improve the performance. Different things should go in different waypoints.
+
+The code above is sufficient to allow the correct code generation as long as the GLAs used are compatible. To perform a type check, we need a GLAManager and type specifier. This is discussed in another place [GLAManager].
+
+To change the parser we need to add code in  `LemonTranslator/parser/DataPath.g` to specify the new syntax. Most of the hard work is already done, we can simply just mimic the behavior of aggregate. The code in `DataPath.g` must call the API that we still need to introduce to specify GLA waypoints. 
+
+*NOTE*: Expressions, list of attributes, etc, are already supported. We can just reuse the facility. The only slightly different feature is specification of the form `a:DOUBLE` that specify a name and a type. 
+
+The only change needed in `LemonTranslator/parser/DPTree.g` is the specification of the content of the GLA waypoint. Again we can mimic the behavior of Aggregate.
+
+
+
+
