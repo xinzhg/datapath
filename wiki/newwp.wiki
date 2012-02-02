@@ -6,11 +6,27 @@ To add a new waypoint to DataPath, 4 separate tasks need to be accomplished. The
 
 Thought this document we use the GLAWaypoint as a running example. This waypoint adds GLA execution capabilities to DataPath. GLAs are a generalization of User Defined Aggregates. Any GLA type is assumed to have the following methods:
   * A constructor, with at most 1 argument: ConstState& 
-  * 
+  * AddItem(const T1& v1, const T2& v2, ...), a method to add a piece of information to the state of the GLA. 
+  * AddState(GLA& other), a method to merge content of other into this state
+  * Optionally, a mechanism to extract result in the form 1 tuple: through the function GetResult(T1& t1, T2& t2, ...)
+  * Optionally, a mechanism to extract, 0 or more tuples: bool GetNext(T1& v1,...)
+  * Optionally, a method to serialize-deserialize the GLA so that it can be transported into user space
 
-= Changes to the parser =
+*Example of GLA*: Average
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+{{{
+class AverageGLA {
+  long long int count; // keeps the number of tuples aggregated
+  double sum; // sum of the values 
+public:  
+  AverageGLA(){ count=0; sum=0.0; }
+  AddItem(const DOUBLE& x){ count++; sum+=x; }
+  AddState(AverageGLA& o){ count+=o.count; sum+=o.sum; }
+  // we only support one tuple as output
+  GetResult(DOUBLE& rez){ rez = (count>0) ? (sum/count) : 0.0;}
+};
+
+}}} 
+
+
+== Changes to the parser ==
