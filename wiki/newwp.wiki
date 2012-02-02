@@ -82,7 +82,7 @@ The only change needed in `LemonTranslator/parser/DPTree.g` is the specification
 
 == Changing LemonTranslator ==
 
- #Add GLA specific API in `LemonTranslator/headers/LemonTranslator.h`
+  # Add GLA specific API in `LemonTranslator/headers/LemonTranslator.h`
 `bool AddGLAWP(WayPointID glaWP)` that specifies the new waypoint type, and `bool AddGLA(WayPointID wp, QueryID query, ..)` that specifies the behavior of the GLA. The arguments we pass should specify the list of outputs and the list of expressions for inputs. The Aggregate allows only 1 input and 1 output. After some thought, we realize we can use the following definition:
 {{{
 bool AddGLA(WayPointID wp, QueryID query, SlotIDContainer& resultAtts, 
@@ -93,5 +93,61 @@ bool AddGLA(WayPointID wp, QueryID query, SlotIDContainer& resultAtts,
 The meaning of `atts`, `expr`, `initializer` is the same for GLAs as it is for either Print or Aggregate waypoints.
 
 
+  # Add code in `LemonTranslator/source/LemonTranslator.cc` (mimic Aggregate)
 
-#
+  # Add a new class in `LemonTranslator/headers`: `LT_GLA` in file `LT_GLA.h`. This class is responsible for storing the information about the GLA waypoint (on a per/query basis), to participate in the analysis that establishes the use of attributes throughout the system and to generate the `.m4` file that _programs_ the code generator. Again, mimicking either the Aggregate or the Print saves a lot of frustration.
+The implementation should be placed in `LemonTranslator/source/LT_GLA.cc`
+This is the file where the configuration object used by the GLA waypoint is constructed as well. Implementation depends on the discussion we will have about this waypoint next.
+
+== Add code for GLA Waypoint ==
+
+The code for GLA waypoint goes in `WayPoints` module. Because of the _swapping paradigm_ the waypoints are written in ..Imp files. In particular, we need to write `WayPoints/headers/GLAWayPointImp.h` and 'WayPoints/source/GLAWayPointImp.cc`. The interface should be identical to the other waypoints (copy the `AggWayPointImp.h` content). The members of the `GLAWayPointImp` class can be anything we need to use in this waypoint.
+
+The crucial thing we have to decide at this point is the type of functions the GLAWayPoint will posses. These are the functions called by the Worker threads to do work. The code in the GLAWayPointImp class only deals with decision making/scheduling. 
+
+*NOTE*: DataPath enforces a complete separation between planing and execution. Furthermore, to ensure performance, the functions should be generated using the code generator. This means that that the code in the GLAWayPointImp does not understand any spepcifics about the GLAs used at runtime. Since we do not want to use virtual methods to manipulate GLAs, we have to ensure that any manipulation happens exclusively in the functions, not in the `GLAWayPointImp` class. The way we will deal with that is to introduce a `GLAPtr` class and the companion `GLAPtrContainer` that holds a pointer to a GLA but it cannot do anything with the pionter. 
+
+A good set of functions might be:
+
+  # `int ProcessChunk(WorkDescription &workDescription, ExecEngineData &result)`
+
+This function will scan a chunk, unpack the tuples and call AddItem for the corresponding GLA. As a result it produces nothing. It returns 1 (we use this in the implementation of the waypoint to know that this function was processed).
+
+All work specification to a work function in DataPath is specified by building a WorkDescription object. The way to implement a new one is to add such a type in `ExecutionEngine/m4/WorkDescription.h.m4`. Such files (see [data] ) contain specification of Data objects that are exchanged in the system. We an call the work type for this function `GLAProcChunk` and write:
+{{{
+M4_CREATE_DATA_TYPE(GLAProcChunk, WorkDescription,
+<//>,
+</(whichQueryExits, QueryExitContainer), (glaPtr, GLAPtr), (chunkToProcess, Chunk)/>)
+}}}
+
+The work function will get a `glaPtr`, that contains the state of an existing GLA. If the `glaPtr` is empty, we can produce a GLA. To be able to return this new glaPtr, we need a derived type from `ExecEngineData` to add the capability. We can do so by adding to file `ExecutionEngine/m4/ExecEngineData.h.m4`:
+{{{
+M4_CREATE_DATA_TYPE(GLAPtrRez, ExecEngineData,
+<//>,
+</(glaPtr, GLAPtr)/>)
+}}}
+If we need to send more info to the GLAWayPoint, we can add it here.
+
+  # `MergeStates(...)` function will take as an argument a set of states and return a single, merged, state. We need to introduce a new type of work description, we can produce a GLAPtrRez as above.
+
+  # `Finalize(...)` will take as argument a glaPtr and extract tuples from it. The resulting chunk is sent to the system as a ChunkContainter. 
+
+*NOTE*: It is tempting to destroy the glaPtr at this point since a chunk was produced from it. One type of behavior that any new WayPoint needs to enforce is dealing correctly with chunk drops. If the chunk is droped, there is no way to produce it again. We need a separate function to destroy GLAs
+
+  # `DestroyGLA(...)`. Get a GLAPtr and delete it. Once the chunk produced is acknowledged, the GLAWayPoint can call this function.
+
+All the work functions we need are specified in the file `ExecutionEngine/m4/WorkFuncs.h.m4`. What we need is:
+{{{
+// GLA
+M4_CREATE_DATA_TYPE(GLAProcessChunkWorkFunc, WorkFuncWrapper, <//>, <//>)
+M4_CREATE_DATA_TYPE(GLAFinalizeWorkFunc, WorkFuncWrapper, <//>, <//>)
+M4_CREATE_DATA_TYPE(GLAMergeStatesWorkFunc, WorkFuncWrapper, <//>, <//>)
+M4_CREATE_DATA_TYPE(GLADestroyWorkFunc, WorkFuncWrapper, <//>, <//>)}}}
+ 
+
+
+
+   
+  
+
+ 
