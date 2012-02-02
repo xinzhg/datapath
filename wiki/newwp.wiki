@@ -1,0 +1,16 @@
+#summary : Instructions on how to add a new waypoint to DataPath
+
+= Overall Plan =
+
+To add a new waypoint to DataPath, 4 separate tasks need to be accomplished. The parser needs to be changed, the translator needs to know how to include the new waypoint into analysis, the WayPoint code that runs in the execution engine needs to establish the data flow while the operator is running and the patterns for code generation have to specify the code that is executed by the workers.
+
+Thought this document we use the GLAWaypoint as a running example. This waypoint adds GLA execution capabilities to DataPath. GLAs are a generalization of User Defined Aggregates. Any GLA type is assumed to have the following methods:
+  * A constructor, with at most 1 argument: ConstState& 
+  * 
+
+= Changes to the parser =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
