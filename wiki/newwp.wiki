@@ -4,7 +4,7 @@
 
 To add a new waypoint to DataPath, 4 separate tasks need to be accomplished. The parser needs to be changed, the translator needs to know how to include the new waypoint into analysis, the WayPoint code that runs in the execution engine needs to establish the data flow while the operator is running and the patterns for code generation have to specify the code that is executed by the workers.
 
-Thought this document we use the GLAWaypoint as a running example. This waypoint adds GLA execution capabilities to DataPath. GLAs are a generalization of User Defined Aggregates. Any GLA type is assumed to have the following methods:
+Throughout this document we use the GLAWaypoint as a running example. This waypoint adds GLA execution capabilities to DataPath. GLAs are a generalization of User Defined Aggregates. Any GLA type is assumed to have the following methods:
   * A constructor, with at most 1 argument: ConstState& 
   * AddItem(const T1& v1, const T2& v2, ...), a method to add a piece of information to the state of the GLA. 
   * AddState(GLA& other), a method to merge content of other into this state
@@ -28,5 +28,8 @@ public:
 
 }}} 
 
+*NOTE*: GLAs are used as syntactic objects. There is no need to inherit from any class since the system uses code generation to produce the functions that are executed. The GLAs should be written as compactly/efficiently as possible. 
+
+*WARNING*: Inheritance and other C++ abstractions are *evil* and kill performance.
 
 == Changes to the parser ==
