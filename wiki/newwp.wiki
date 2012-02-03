@@ -85,7 +85,7 @@ The only change needed in `LemonTranslator/parser/DPTree.g` is the specification
   # Add GLA specific API in `LemonTranslator/headers/LemonTranslator.h`
 `bool AddGLAWP(WayPointID glaWP)` that specifies the new waypoint type, and `bool AddGLA(WayPointID wp, QueryID query, ..)` that specifies the behavior of the GLA. The arguments we pass should specify the list of outputs and the list of expressions for inputs. The Aggregate allows only 1 input and 1 output. After some thought, we realize we can use the following definition:
 {{{
-bool AddGLA(WayPointID wp, QueryID query, SlotIDContainer& resultAtts, 
+bool AddGLA(WayPointID wp, QueryID query, SlotContainer& resultAtts, 
             string glaType, SlotContainer& atts, string expr, string initializer = "");
 }}}
 `resultAtts` will be the list of attributes produced as the result, empty if none; `glaType` will be the name of the GLA; `atts` the list of attributes in `expr`; `expr` the comma separated list of expressions forming the input.
