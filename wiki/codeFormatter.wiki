@@ -1,4 +1,4 @@
-#summary : Code formatter for Emacs
+#summary Code formatter for Emacs
 
 = Formatting modes for DataPath =
 This file describes coding style to be used in DataPath project.
