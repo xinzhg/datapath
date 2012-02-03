@@ -5,7 +5,7 @@ This file describes coding style to be used in DataPath project.
 
 *EMACS*:
 
-In Emacs, add the following snippet of code in Emacs config file ('~/.emacs') to get good indentation.
+In Emacs, add the following snippet of code in Emacs config file (`~/.emacs`) to get good indentation.
 The code sets the size of a displayed tab to 2 (compact version).
 If size 4 is prefered, the value of both `tab-width` and `c-basic-offset` should be changed.
 
