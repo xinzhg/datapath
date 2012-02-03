@@ -1,4 +1,4 @@
-#summary : Instructions on how to add a new waypoint to DataPath
+#summary Instructions on how to add a new waypoint to DataPath
 
 = Overall Plan =
 
