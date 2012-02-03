@@ -142,7 +142,8 @@ All the work functions we need are specified in the file `ExecutionEngine/m4/Wor
 M4_CREATE_DATA_TYPE(GLAProcessChunkWorkFunc, WorkFuncWrapper, <//>, <//>)
 M4_CREATE_DATA_TYPE(GLAFinalizeWorkFunc, WorkFuncWrapper, <//>, <//>)
 M4_CREATE_DATA_TYPE(GLAMergeStatesWorkFunc, WorkFuncWrapper, <//>, <//>)
-M4_CREATE_DATA_TYPE(GLADestroyWorkFunc, WorkFuncWrapper, <//>, <//>)}}}
+M4_CREATE_DATA_TYPE(GLADestroyWorkFunc, WorkFuncWrapper, <//>, <//>)
+}}}
  
 
 
