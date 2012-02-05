@@ -34,3 +34,64 @@ One of the best features of C/C++ type language is the explicit memory allocatio
 
 A related problem is the fact that, if explicitly allocated, objects need to be manipulated through pointers rather than local variables. This makes the code less legible and strongly encourages hacks. Converting pointers to `void*` is way too tempting. The question is *can we have our cake and eat it too?*.
 
+== Swapping Paradigm ==
+
+A relatively unknown, undeservedly so, programming paradigm is the use of swapping to avoid aliasing. These ideas are quite old but have been mostly championed by Bruce Weide at Ohio State through the *Resolve/C++*.  The main problem that the swapping paradigm tackles is eliminating _aliasing_. By doing so, a lot of headaches are eliminated. As a bonus, swapping paradigm, as we explain below, simplifies multi-threaded programming.
+
+Aliasing refers to the fact that, in most languages, it is easy to create multiple names/handles for the same object. Due to this disconnect between name and object, is is easy to loose track of who has access to the object. This makes it hard to control when the object can be destroyed or, worse, whether we need synchronization to ensure consistent multi-threaded manipulation of the object. Immutable datatypes_ and garbage collectors were introduced to combat these problems. They work well for high-level languages but they do not allow any type of control, when needed. If we could guarantee that objects are not aliased, all these problems would disappear; no need for garbage collectors or immutable datatypes.
+
+Swapping paradigm solves completely the aliasing problem. Each object has single ownership, thus a single handler. When this only handler is destroyed, the object is destroyed. Moreover, whoever has the handler, has exclusive access to the object, thus there is no need for any synchronization.  How then can we allow somebody else to access an object we own; this is strictly needed if we want to delegate work. The answer is by swapping.  Under swapping paradigm, two operations are supported. First, is the creation of _empty/bogus_ objects, second the the `swap`. To see how this works consider the following piece of code:
+
+{{{
+void StoreObject(Object& object){
+  Object myObject; // create empty object
+  myObject.swap(object); // exchange content
+  // object now contains my bogus content, myObject has the real content
+  // caller has lost ownership, the real object is mine
+}
+
+void GetObject(Object& object){
+  myObject.swap(object); // give back the object
+}
+}}}
+
+Under swapping paradigm, objects behave more like real objects. If you need to use something I have you can borrow it and give it back latter. By banning _copy constructors_  and requiring an explicit `copy()` that duplicates an object, if needed, we can get rid of explicit memory manipulation for long lived objects. The implementation of `Object` will create the content/real object through constructors. The destructor will delete the real object, if not bogus. In terms of efficient implementation, we can use two classes in the following way:
+
+{{{
+class ObjectImp; // forward declaration of real object type
+// frontend class. Makes object look like local variable
+class Object{
+  private:
+    ObjectImp* pObject; // pointer to real object
+
+  public:
+   // construct real object from int 
+   Object(int i){ pObject = new ObjectImp(i); }
+   // construct bogus/empty object
+   Object(){ pObject = NULL; }
+   // method call
+   void Process(double x){ if (pObject!=NULL) pObject->Process(x); }
+   // destructor
+   ~Object(){ if (pObject!=NULL) delete pObject; }
+};
+
+// backend class, real object
+class ObjectImp {
+  private:
+    int myI; // private state
+  public:
+    // constructor from int  
+    ObjectImp(int i){ myI=i; }
+    // no need for default constructor
+    
+    // method
+    Process(double x){ myInt*=x; }
+
+    // no need for destructor
+  
+};
+}}}
+
+Using this type of implementation, swapping is very efficient. Even though there is a level of indirection, the compiler will do a very good job at optimizing the code and masking this. The only truly annoying thing is the fact that we need to write 2 classes instead of 1. 
+
+!DataPath uses the above technique extensively. 
