@@ -72,7 +72,7 @@ iii) Localization of Aggregation - Each Mapper produces data for every reducer i
 
 The mode of execution of a GLA as mentioned earlier during the example is as simple as it gets. GLA essentially operates on a framework called GLADE implemented on top of Datapath. Datapath is a data centric data processing engine. It is push based not pull based and focuses on finding computation for data rather than data for a computation. As introduced earlier data circulates through datapath in the form of chunks. GLADE automates all the process of resource management and task management for GLAs, utilizing all the computational abilities of Datapath. 
 
-[More to Come]
+*More to Come*
 
 ==Further Reading== 
 Florin Rusu and Alin Dobra. GLADE: [http://faculty.ucmerced.edu/frusu/Papers/Conference/2011-ladis-glade.pdf A Scalable Framework for Ecient Analytics]. Proceedings of the 2011 LADIS Workshop on Large Scale Distributed Systems and Middleware (LADIS 2011) held in
