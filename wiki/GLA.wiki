@@ -1,7 +1,5 @@
-#summary One-sentence summary of this page.
+#summary Generalized Linear Aggregate(GLA) a parallel computational model for large scale data analysis.
 = GLA : Up Close And Personal = 
-
-GLA or Generalized Linear Aggregate is a parallel computational model  that is an efficient paradigm for large scale data analysis. This article gives an overview of the model in detail.
 
 = Introduction =
 
@@ -73,13 +71,6 @@ iii) Localization of Aggregation - Each Mapper produces data for every reducer i
 ==GLA and Datapath==
 
 The mode of execution of a GLA as mentioned earlier during the example is as simple as it gets. GLA essentially operates on a framework called GLADE implemented on top of Datapath. Datapath is a data centric data processing engine. It is push based not pull based and focuses on finding computation for data rather than data for a computation. As introduced earlier data circulates through datapath in the form of chunks. GLADE automates all the process of resource management and task management for GLAs, utilizing all the computational abilities of Datapath. 
-
-
-LargeState
-Distribution
-Locality
-Associtive nature of GLA
-Aggregation tree
 
 
 ==Further Reading== 
