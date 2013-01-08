@@ -1,0 +1,70 @@
+# Makefile template to compile the generated code
+# asumes that make is called like this:
+# make -f MK-generaged -DOBJECTS="WP1.O ..." 
+# The macro OBJECTS must list the objects needed
+
+LINK_PATH = -L../../../../Libs/libraries
+
+# COMPILER SELECTION
+CC=g++
+#CC=/opt/intel/Compiler/11.1/056/bin/intel64/icc
+
+CCFLAGS = -fPIC -g -D_FILE_OFFSET_BITS=64 -DDEBUG
+
+#CCFLAGS += -DSLOW_MAP_DSTRING
+
+# use C++11 standard
+CCFLAGS += -std=gnu++11
+#CCFLAGS += -std=gnu++0x
+
+M4=m4 
+
+# COMPILER OPTIMIZATION
+ifdef DEBUG_DATAPATH
+OPT= -Wall # no optimization, more warnings
+else # full optimization
+OPT= -O3 -march=native -ffast-math
+endif
+
+
+GLA_INC = -I ../../../GLAs/
+LIB_INC = -I ../../../../Libs/
+M4INCLUDES = -I ../../../M4/m4 
+M4INCLUDES += -I ../../../WPFunctionModules 
+M4INCLUDES += -I ../../../GLAs 
+M4INCLUDES += -I ../../../UDFs 
+M4INCLUDES += $(LIB_INC)
+
+ifdef DP_GLAs
+GLA_INC += -I $(DP_GLAs)
+M4INCLUDES += -I $(DP_GLAs) 
+FUNC_INC += -I $(DP_FUNCTIONS)
+endif
+
+CINCLUDES = -I ../../../Headersdp ${GLA_INC} $(FUNC_INC) ${LIB_INC}
+
+LIB_EXTRACT = ../extract_libs.awk
+LIB_PROCESS = ../process_libs.sh
+
+# to preserve the generated cc files we need this
+.PRECIOUS: %.cc
+
+DataTypes.m4:
+	ln -s ../DataTypes.m4
+
+%.cc: %.m4 DataTypes.m4
+	$(M4) $(M4INCLUDES) $< > $@
+
+%.o : %.cc
+	$(CC) $(CINCLUDES) $(CCFLAGS) $(OPT) -c -o $@ $^
+
+%.lib : %.cc
+	${LIB_EXTRACT} $^ > $@
+
+libfile: ${OBJECTS:.o=.lib}
+	sort -u $^ > libfile.temp
+	${LIB_PROCESS} libfile.temp > libfile
+	rm libfile.temp
+
+Generated.so: ${OBJECTS} libfile
+	${CC} ${OPT} -rdynamic -shared  -o Generated.so   $(LINK_PATH) ${OBJECTS} ${LIBS} ${STAT_LIBS} $(shell cat libfile)

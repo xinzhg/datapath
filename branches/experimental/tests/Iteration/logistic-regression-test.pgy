@@ -1,0 +1,22 @@
+#include "arma.pgy"
+
+LOAD lineitem;
+
+agg =
+GLA:LogisticRegressionIRLS (3)
+FROM
+    lineitem
+USING
+    UDF:MakeVector<3, DOUBLE>(lineitem.l_quantity, lineitem.l_discount, lineitem.l_tax),
+    lineitem.l_extendedprice
+AS
+    tupleCount : BIGINT;
+
+PRINT
+    agg
+USING
+    tupleCount
+AS
+    tupleCount : BIGINT
+INTO
+    "logistic-regression-test.csv";
