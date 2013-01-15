@@ -31,14 +31,14 @@ First, download the pre-compiled Antlr jar from [http://www.antlr.org/download/a
 
 Next, we will need to create a simple script to act as a front-end to Antlr and the JVM. Place the following script at /usr/local/bin/antlr3
 
-<code language="sh">
+{{{
 #!/bin/sh
 
 # Replace this with the location of the antlr jar on your system.
 ANTLR_JAR=/usr/local/share/antlr-3.4-complete.jar
 
 java -jar $ANTLR_JAR "$@"
-</code>
+}}}
 
 Next, make this file executable by running the following command (note: you may have to run this command as the superuser depending on your permissions.):
 
