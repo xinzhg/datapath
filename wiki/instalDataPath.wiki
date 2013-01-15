@@ -51,7 +51,13 @@ Navigate to the `src` directory, and run the following command:
 
 This script will give you an overview of the settings that will be used by DataPath as well as an estimate of how much RAM DataPath will use for its global hash. If these settings look ok, accept them and the script will automatically compile DataPath.
 
-Next, run `sudo make install` to install a front-end to DataPath that makes running queries easier. Note that this frontend will not work properly unless you open a new terminal.
+To install a front-end to DataPath that makes running queries easier, run the follwing:
+
+{{{
+sudo make install
+}}}
+
+Note that this frontend will not work properly unless you open a new terminal.
 
 == Running Queries ==
 
