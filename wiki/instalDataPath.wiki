@@ -1,4 +1,5 @@
 #summary : Step by step guide to install DataPath.
+#labels Featured
 
 = Installation Guide =
 
